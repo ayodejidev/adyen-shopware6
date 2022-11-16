@@ -1,6 +1,5 @@
 tasks:
   - command: |
-      export APP_URL=`gp url 8080`
       docker-compose up
 ports:
   - port: 8080
