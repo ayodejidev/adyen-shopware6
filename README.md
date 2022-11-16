@@ -1,1 +1,1 @@
-# adyen-shopware6
+# adyen-shopware6 Demo
