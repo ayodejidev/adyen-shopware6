@@ -3,12 +3,15 @@ version: "3"
 services:
 
     shopware:
-      image: dockware/play:latest
+      image: dockware/dev:latest
       container_name: shopware
       ports:
          - "80:80"
          - "443:443"
          - "3306:3306"
+         - "8080:8080"
+         - "9200:9200"
+         - "9300:9300"
       networks:
          - web
 
