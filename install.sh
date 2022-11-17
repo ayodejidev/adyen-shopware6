@@ -1,11 +1,19 @@
 #!/bin/bash
 
-sudo docker exec shopware mysql -u root --password='root' shopware -e "update sales_channel_domain set url='${APP_URL}' where url LIKE '%localhost%'" 2> /dev/null
-sudo docker exec shopware mysql -u root --password='root' shopware_test -e "update sales_channel_domain set url='${APP_URL}' where url LIKE '%localhost%'" 2> /dev/null
-sudo docker exec shopware mysql -u root --password='root' shopware_e2e -e "update sales_channel_domain set url='${APP_URL}' where url LIKE '%localhost%'" 2> /dev/null
-sudo docker exec shopware bash -c 'composer require adyen/adyen-shopware6:*'
+if [[ -z ${APP_DOMAIN+x} ]] ; then
+    echo "Expected environment variables not found. Please set the APP_DOMAIN environment variable."
+    exit 5;
+fi
+
+# Setup domain
+sudo docker exec shopware bash -c "bin/console sales-channel:update:domain ${APP_DOMAIN}"
+
+# Install Adyen Plugin 
+sudo docker exec shopware bash -c 'composer require adyen/adyen-shopware6'
 sudo docker exec shopware bash -c 'php bin/console plugin:refresh'
 sudo docker exec shopware bash -c 'php bin/console plugin:install AdyenPaymentShopware6 --activate'
 sudo docker exec shopware bash -c 'php bin/console cache:clear'
 
-# sudo docker exec shopware composer require adyen/adyen-shopware6
+# Upgrade HTTP to HTTPS
+CSP='Header set Content-Security-Policy "upgrade-insecure-requests"'
+sudo docker exec shopware bash -c "echo -e '\n${CSP}' >> /var/www/html/public/.htaccess"
